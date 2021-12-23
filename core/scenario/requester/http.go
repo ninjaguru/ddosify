@@ -115,13 +115,14 @@ func (h *HttpRequester) Send() (res *types.ResponseItem) {
 
 	// Finalize
 	res = &types.ResponseItem{
-		ScenarioItemID: h.packet.ID,
-		RequestID:      uuid.New(),
-		StatusCode:     statusCode,
-		RequestTime:    reqStartTime,
-		Duration:       durations.totalDuration(),
-		ContentLenth:   contentLength,
-		Err:            requestErr,
+		ScenarioItemID:   h.packet.ID,
+		ScenarioItemName: h.packet.Name,
+		RequestID:        uuid.New(),
+		StatusCode:       statusCode,
+		RequestTime:      reqStartTime,
+		Duration:         durations.totalDuration(),
+		ContentLenth:     contentLength,
+		Err:              requestErr,
 		Custom: map[string]interface{}{
 			"dnsDuration":           durations.getDNSDur(),
 			"connDuration":          durations.getConnDur(),
@@ -217,7 +218,11 @@ func (h *HttpRequester) initRequestInstance() (err error) {
 	// Headers
 	header := make(http.Header)
 	for k, v := range h.packet.Headers {
-		header.Set(k, v)
+		if strings.EqualFold(k, "Host") {
+			h.request.Host = v
+		} else {
+			header.Set(k, v)
+		}
 	}
 
 	ua := header.Get("User-Agent")
